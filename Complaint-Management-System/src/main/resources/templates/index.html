@@ -29,6 +29,7 @@
             --input-bg: #495057;
             --border-color: #495057;
             --success-color: #66bb6a;
+            --error-color: #ff5252;
         }
 
         /* --- Global Styles --- */
@@ -54,15 +55,15 @@
             transition: background-color 0.3s;
         }
         
-        /* --- Header and Theme Toggle --- */
+        /* --- Header, Theme Toggle & Logout --- */
         .header-controls {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between; /* Added space-between */
             align-items: center;
             margin-bottom: 25px;
         }
         
-        #theme-toggle {
+        #theme-toggle, #logout-btn {
             background: var(--primary-color);
             color: white;
             border: none;
@@ -72,8 +73,29 @@
             font-size: 0.9em;
             transition: background-color 0.3s;
         }
-        #theme-toggle:hover {
+        #theme-toggle:hover, #logout-btn:hover {
             opacity: 0.8;
+        }
+        
+        /* --- Login Form Styling (NEW) --- */
+        .login-box { 
+            max-width: 400px; 
+            margin: 50px auto; 
+            padding: 30px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .login-box button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
         }
 
         h1 {
@@ -98,21 +120,23 @@
         }
 
         /* --- Form Styling --- */
-        #complaint-form {
+        #complaint-form, .login-box form { /* Updated selector */
             background-color: var(--secondary-color);
             padding: 25px;
             border-radius: 8px;
             margin-bottom: 30px;
             border: 1px solid var(--border-color);
         }
-        #complaint-form label {
+        #complaint-form label, .login-box label { /* Updated selector */
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
         }
         #complaint-form input[type="text"], 
         #complaint-form textarea,
-        #complaint-form select {
+        #complaint-form select,
+        .login-box input[type="text"], 
+        .login-box input[type="password"] { /* Updated selector */
             width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 15px;
@@ -136,13 +160,14 @@
             transition: background-color 0.3s ease;
         }
         
-        /* --- Message Styling (No Change) --- */
-        #message {
+        /* --- Message Styling --- */
+        #message, #login-message { /* Added login-message */
             margin-top: 15px;
             padding: 10px;
             border-radius: 5px;
             font-weight: bold;
             display: none;
+            text-align: center;
         }
         #message.success {
             background-color: #d4edda; color: var(--success-color); border: 1px solid var(--success-color);
@@ -150,10 +175,10 @@
         body.dark-theme #message.success {
             background-color: #1b5e20; border-color: #388e3c; color: #a5d6a7;
         }
-        #message.error {
+        #message.error, #login-message.error { /* Updated login-message */
             background-color: #f8d7da; color: var(--error-color); border: 1px solid var(--error-color);
         }
-        #message.show {
+        #message.show, #login-message.show { /* Updated login-message */
             display: block;
         }
         
@@ -213,16 +238,15 @@
         .status-RESOLVED { background-color: #e6ffed; color: var(--success-color); }
         .status-IN_PROGRESS { background-color: #bbdefb; color: #1565c0; }
         
-        /* --- Category Tag Styles (NEW/UPDATED) --- */
+        /* --- Category Tag Styles --- */
         .category-STUDENT { 
-            background-color: #ffcc80; /* Light Orange */
-            color: #e65100; /* Darker Orange text */
+            background-color: #ffcc80; 
+            color: #e65100; 
         }
         .category-STAFF { 
-            background-color: #bbdefb; /* Light Blue */
-            color: #0d47a1; /* Darker Blue text */
+            background-color: #bbdefb; 
+            color: #0d47a1; 
         }
-        /* Fallback/N/A tag style */
         .category-N_A { 
             background-color: var(--secondary-color); 
             color: var(--text-color); 
@@ -244,7 +268,7 @@
             border-radius: 8px;
         }
         
-        /* --- NEW RESOLUTION BUTTON STYLES --- */
+        /* --- RESOLUTION BUTTON STYLES --- */
         .complaint-actions {
             margin-top: 15px;
             padding-top: 10px;
@@ -281,6 +305,7 @@
         
         <div class="header-controls">
             <button id="theme-toggle">Switch to Dark Mode</button>
+            <button id="logout-btn" style="display: none;">Logout</button>
         </div>
 
         <h1>
@@ -293,39 +318,58 @@
             </svg>
             Complaint Management Dashboard
         </h1>
-
-        <h2>Submit New Complaint</h2>
-        <form id="complaint-form">
-            <label for="category">Your Role / Category:</label>
-            <select id="category" name="category" required>
-                <option value="" disabled selected>Select Role</option>
-                <option value="STUDENT">Student</option>
-                <option value="STAFF">Staff</option>
-            </select>
+        
+        <div id="login-container" class="login-box">
+            <h3 style="border-bottom: none; margin-top: 0;">User Login</h3>
+            <div id="login-message" class="error"></div>
+            <form id="login-form">
+                <label for="login-username">Username:</label>
+                <input type="text" id="login-username" required>
             
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" required>
-
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" rows="4" required></textarea>
-
-            <button type="submit">Submit Complaint</button>
-            <div id="message" class=""></div> 
-        </form>
-        
-        <h3>Complaint List</h3>
-        
-        <div class="list-controls">
-             <label for="filter-category" style="font-weight: bold;">Filter by Role:</label>
-             <select id="filter-category">
-                 <option value="ALL">All Roles</option>
-                 <option value="STUDENT">Student</option>
-                 <option value="STAFF">Staff</option>
-             </select>
+                <label for="login-password">Password:</label>
+                <input type="password" id="login-password" required>
+            
+                <button type="submit">Login</button>
+            </form>
         </div>
 
-        <div id="complaint-container" class="complaint-list">
-            <p class="empty-list-message">Loading complaints...</p>
+
+        <div id="dashboard-container" style="display: none;">
+            
+            <h2 id="welcome-message">Welcome!</h2> <h2>Submit New Complaint</h2>
+            <form id="complaint-form">
+                <label for="category">Your Role / Category:</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled selected>Select Role</option>
+                    <option value="STUDENT">Student</option>
+                    <option value="STAFF">Staff</option>
+                </select>
+                
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+
+                <button type="submit">Submit Complaint</button>
+                <div id="message" class=""></div> 
+            </form>
+            
+            <h3>Complaint List</h3>
+            
+            <div class="list-controls">
+                 <label for="filter-category" style="font-weight: bold;">Filter by Role:</label>
+                 <select id="filter-category">
+                     <option value="ALL">All Roles</option>
+                     <option value="STUDENT">Student</option>
+                     <option value="STAFF">Staff</option>
+                 </select>
+            </div>
+
+            <div id="complaint-container" class="complaint-list">
+                <p class="empty-list-message">Loading complaints...</p>
+            </div>
+            
         </div>
     </div>
 

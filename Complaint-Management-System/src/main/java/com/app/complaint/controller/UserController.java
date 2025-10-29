@@ -5,6 +5,7 @@ import com.app.complaint.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder; // New Import!
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,19 +15,20 @@ import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users") // Base path for user-related actions
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder; // Inject the PasswordEncoder
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder; // Assign the Encoder
     }
 
     /**
      * Endpoint to handle user login requests.
-     * Takes username and password in the request body.
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
@@ -42,9 +44,10 @@ public class UserController {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             
-            // INSECURE CHECK: Compares raw passwords because we removed the security config.
-            if (user.getPassword().equals(password)) { 
-                // Login Success: Return role and username (and future token)
+            // SECURE CHECK: Use passwordEncoder.matches() to compare raw password 
+            // with the hashed password from the database.
+            if (passwordEncoder.matches(password, user.getPassword())) { 
+                // Login Success: Return role and username
                 return ResponseEntity.ok(Map.of(
                         "success", true,
                         "username", user.getUsername(),
@@ -56,6 +59,4 @@ public class UserController {
         // Login Failure
         return new ResponseEntity<>("Invalid username or password.", HttpStatus.UNAUTHORIZED);
     }
-    
-    // (You can add a /register endpoint here later if needed)
 }
